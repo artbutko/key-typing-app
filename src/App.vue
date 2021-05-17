@@ -16,7 +16,7 @@ export default {
   padding: 0;
 }
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Roboto Mono', monospace;
   text-align: center;
   background-color: #EFEEEE;
   height: 100vh;
