@@ -1,17 +1,27 @@
-import Vue from 'vue';
-import VueRouter from 'vue-router';
-import HelloWorld from "@/components/Home"
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import MainPage from '@/views/MainPage'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
-    path: '',
-    component: HelloWorld,
+    path: '/',
+    name: 'Main',
+    component: MainPage
+  },
+  {
+    path: '/speed-test',
+    name: 'SpeedTest',
+    component: () =>
+      import('../views/SpeedTest.vue')
   }
 ]
 
-export const router = new VueRouter({
-  routes,
+const router = new VueRouter({
   mode: 'history',
+  base: process.env.BASE_URL,
+  routes
 })
+
+export default router

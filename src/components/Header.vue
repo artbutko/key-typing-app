@@ -1,0 +1,52 @@
+<template>
+  <div id='header' class='p-2'>
+      <button
+        id='change-mode'
+        class='change-mode_button'
+        :class='mode'
+        @click="$emit('toggle')">
+        <font-awesome-icon
+          v-show="mode === 'dark'"
+          :icon="['fas', 'moon']"
+          size='2x'
+        />
+        <font-awesome-icon
+          v-show="mode === 'light'"
+          :icon="['fas', 'sun']"
+          size='2x'
+        />
+      </button>
+      <b-tooltip target="change-mode">Поменять оформление</b-tooltip>
+  </div>
+</template>
+
+<script>
+
+export default {
+  name: 'Header',
+  props: ['mode']
+}
+</script>
+
+<style scoped lang="scss">
+#header {
+  height: 70px;
+}
+
+.change-mode_button {
+  height: 50px;
+  width: 50px;
+  border: none;
+  outline: none;
+  align-items: center;
+  float: right;
+}
+
+.dark {
+  color: bisque;
+}
+
+.light {
+  color: darkslategrey;
+}
+</style>
