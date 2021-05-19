@@ -50,7 +50,10 @@ export default {
   watch: {
     isStringTyped: {
       handler (val) {
-        if (val) this.stopTimer()
+        if (val) {
+          this.stopTimer()
+          this.$emit('open-results-modal')
+        }
       }
     }
   }

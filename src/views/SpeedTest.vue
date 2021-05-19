@@ -1,16 +1,28 @@
 <template>
   <div class="speed-test">
-    <!--    <button-->
-    <!--        class="neo-button btn-before">-->
-    <!--      Убрать первый символ-->
-    <!--    </button>-->
-    <div id="type" class="mx-auto" :key=isRerender>
-      {{ fetchedString }}
+    <div id='input-card'>
+      <p v-for="(item, index) in fetchedArrayString"
+            :key="index"
+            :class="[index === 0 ? 'current' : '']"
+            :id='`letter-${index}`'
+            :style='listItemStyle(item)'
+            class='letter'
+      >
+        {{item}}
+      </p>
     </div>
     <SpeedOfTyping
+      v-if='isNotCompleted'
       :symbols="countOfLettersTyped"
       :is-string-typed="isStringTyped"
+      @open-results-modal='openResultsModal'
     />
+    <div>
+      Ошибок: {{ typingErrors }}
+    </div>
+    <b-modal id='results-modal' title='nice'>
+      <p class="my-4">Hello from modal!</p>
+    </b-modal>
   </div>
 </template>
 
@@ -25,25 +37,56 @@ export default {
   },
   data () {
     return {
-      fetchedString: 'QWERTYUIOPASDFGHJKLZXCVBNM',
-      isRerender: true,
+      fetchedArrayString: [
+        'Q', 'W', 'E', 'R', 'T', 'Y', ',', 'q', 'w', 'e', 'r',
+        't', 'y', ' ', 'T', 'Y', 'W', 'E', 'R', 'T', 'Y', 'W',
+        'E', 'R', 'T', 'Y', 'W', 'E', 'R', 'T', 'Y'
+      ],
+      providedKeys: ['Shift', 'Tab', 'CapsLock', 'Alt', 'Meta'],
+      currentLetter: 0,
+      isNotCompleted: true,
       countOfLettersTyped: 0,
       isStringTyped: false,
       typingErrors: 0
     }
   },
   methods: {
+    removeStyleClass (elementId, tokens) {
+      document
+        .getElementById(elementId)
+        .classList
+        .remove(tokens)
+    },
+    addStyleClass (elementId, tokens) {
+      document
+        .getElementById(elementId)
+        .classList
+        .add(tokens)
+    },
     keyDown (event) {
-      if (event.key === this.fetchedString[0]) {
-        this.fetchedString = this.fetchedString.substring(1)
-        if (!this.fetchedString.length) {
+      if (event.key === this.fetchedArrayString[this.currentLetter]) {
+        this.removeStyleClass(`letter-${this.currentLetter}`, 'current')
+        this.removeStyleClass(`letter-${this.currentLetter}`, 'current-error')
+        this.addStyleClass(`letter-${this.currentLetter}`, 'past')
+        this.currentLetter += 1
+        if (this.currentLetter + 1 === this.fetchedArrayString.length) {
           this.isStringTyped = true
+        } else {
+          this.countOfLettersTyped++
         }
-        this.countOfLettersTyped++
-      } else {
+        this.addStyleClass(`letter-${this.currentLetter}`, 'current')
+      } else if (!this.providedKeys.find((key) => key === event.key)) {
+        this.addStyleClass(`letter-${this.currentLetter}`, 'current-error')
         this.typingErrors++
-        document.getElementById('type').classList.add('handler')
       }
+    },
+    openResultsModal () {
+      this.isNotCompleted = false
+      this.$bvModal.show('results-modal')
+    },
+    listItemStyle (i) {
+      if (i === ' ') return 'white-space: pre'
+      return ''
     }
   },
   mounted () {
@@ -55,26 +98,6 @@ export default {
 <style scoped lang="scss">
 .speed-test {
   height: 100vh;
-}
-
-.neo-button {
-  padding: 10px;
-  background-color: #EFEEEE;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  cursor: pointer;
-}
-
-.btn-before {
-  box-shadow:
-    6px 6px 16px 0 rgba(0, 0, 0, 0.25),
-    -6px -6px 12px 0 rgba(255, 255, 255, 0.3);
-}
-
-.btn-after {
-  box-shadow:
-    6px 6px 16px 0 rgba(255, 255, 255, 0.3) inset,
-    -6px -6px 12px 0 rgba(0, 0, 0, 0.25) inset;
 }
 
 #type {
@@ -91,5 +114,35 @@ export default {
 
 .handler::first-letter{
   color: #4f2f2f !important;
+}
+
+#input-card {
+  width: 400px;
+  height: 100px;
+  border: 2px #4f2f2f solid;
+}
+
+.current {
+  background-color: #4d5e57;
+  color: bisque;
+  width: 30px;
+  border-radius: 3px;
+}
+
+.current-error {
+  background-color: #4f2f2f;
+  color: bisque;
+  width: 30px;
+  border-radius: 3px;
+}
+
+.past {
+  color: dimgray;
+}
+
+.letter {
+  text-align: center;
+  font-size: 24px;
+  display: inline-block;
 }
 </style>
