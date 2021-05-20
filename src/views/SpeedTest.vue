@@ -1,62 +1,114 @@
 <template>
   <div class="speed-test">
-    <div id='input-card'>
-      <p v-for="(item, index) in fetchedArrayString"
-            :key="index"
-            :class="[index === 0 ? 'current-letter' : '']"
-            :id='`letter-${index}`'
-            :style='listItemStyle(item)'
-            class='letter'
+    <b-row class='center'>
+      <b-col
+        v-if='!isCompleted'
+        id='input-card'
+        :key='isNeedRepeat'
+        cols='8'
       >
-        {{item}}
-      </p>
-    </div>
-    <SpeedOfTyping
-      v-if='isNotCompleted'
-      :symbols="currentLetter"
-      :is-string-typed="isStringTyped"
-      @open-results-modal='openResultsModal'
-    />
-    <div>
-      Ошибок: {{ typingErrors }}
-    </div>
-    <b-modal id='results-modal' title='nice'>
-      <p class="my-4">Hello from modal!</p>
-    </b-modal>
+          <p v-for="(item, index) in fetchedString"
+             :key="index"
+             :class="[index === 0 ? 'current-letter' : '']"
+             :id='`letter-${index}`'
+             :style='listItemStyle(item)'
+             class='letter'
+          >
+            {{item}}
+          </p>
+      </b-col>
+      <b-col>
+        <b-row>
+          <b-col>
+            <InfoCard
+              icon='crosshairs'
+              title='Точность'
+              :number='+accuracy'
+              sign='%'
+            />
+          </b-col>
+          <b-col>
+            <InfoCard
+              icon='tachometer-alt'
+              title='Скорость'
+              :number='letterPerMinute'
+              sign='зн./мин'
+            />
+          </b-col>
+          <b-col v-if='isCompleted'>
+            <InfoCard
+              icon='medal'
+              title='Результат'
+              :number='fetchedString.length'
+              sign='символов'
+            />
+          </b-col>
+          <b-col cols='4' v-if='isCompleted'></b-col>
+          <b-col>
+            <button
+              class='repeat-timer_button'
+              onclick='this.blur();'
+              @click='repeatTimer'>
+              Заново
+            </button>
+            <button
+              class='repeat-text_button'
+              onclick='this.blur();'
+              @click='reloadText()'>
+              Обновить текст
+            </button>
+          </b-col>
+          <b-col cols='4' v-if='isCompleted'></b-col>
+        </b-row>
+      </b-col>
+    </b-row>
   </div>
 </template>
 
 <script>
-import SpeedOfTyping from '@/components/SpeedOfTyping'
+import contentApi from '@/api/content'
+import InfoCard from '@/components/InfoCard'
 
 export default {
   name: 'SpeedTest',
-  components: { SpeedOfTyping },
-  comments: {
-    SpeedOfTyping
-  },
+  components: { InfoCard },
   data () {
     return {
-      fetchedArrayString: 'Мама мыла раму',
-      permittedKeys: ['Shift', 'Tab', 'CapsLock', 'Alt', 'Meta'],
+      fetchedString: '',
+      permittedKeys: ['Shift', 'Tab', 'CapsLock', 'Alt', 'Meta', 'Control'],
       currentLetter: 0,
-      isNotCompleted: true,
-      isStringTyped: false,
-      typingErrors: 0
+      isNeedRepeat: false,
+      isCompleted: false,
+      typingErrors: 0,
+      accuracy: 100,
+      currentTime: 0,
+      letterPerMinute: 0
+    }
+  },
+  async beforeCreate () {
+    try {
+      this.fetchedString = (await contentApi.getTextForTest()).data.text
+    } catch (e) {
+      alert(e)
     }
   },
   methods: {
     keyDown (event) {
-      if (event.key === this.fetchedArrayString[this.currentLetter]) {
+      if (this.isCyrillic(event.key)) {
+        this.stopTimer()
+        alert('Смените раскладку')
+        this.startTimer()
+      } else if (event.key === this.fetchedString[this.currentLetter]) {
         let passedElement = document.getElementById(`letter-${this.currentLetter}`)
         passedElement.classList.remove('current-letter', 'error-letter')
         passedElement.classList.add('passed-letter')
 
         this.currentLetter += 1
 
-        if (this.currentLetter === this.fetchedArrayString.length) {
-          this.isStringTyped = true
+        if (this.currentLetter === this.fetchedString.length) {
           document.removeEventListener('keydown', this.keyDown)
+          this.stopTimer()
+          this.isCompleted = true
         }
 
         let currentElement = document.getElementById(`letter-${this.currentLetter}`)
@@ -68,81 +120,138 @@ export default {
         currentErrorElement.classList.add('error-letter')
         currentErrorElement.innerText = event.key
         setTimeout(() => {
-          currentErrorElement.innerText = this.fetchedArrayString[this.currentLetter]
+          currentErrorElement.innerText = this.fetchedString[this.currentLetter]
         }, 100)
         this.typingErrors++
+        this.accuracy = ((1 - (this.typingErrors / this.fetchedString.length)) * 100)
+          .toFixed(2)
       }
-    },
-    openResultsModal () {
-      this.isNotCompleted = false
-      this.$bvModal.show('results-modal')
     },
     listItemStyle (i) {
       return i === ' ' ? 'white-space: pre' : ''
+    },
+    startTimer () {
+      this.timer = setInterval(() => {
+        this.currentTime++
+        this.letterPerMinute = Math.ceil((this.currentLetter / this.currentTime) * 60)
+      }, 1000)
+    },
+    stopTimer () {
+      clearTimeout(this.timer)
+    },
+    repeatTimer () {
+      this.stopTimer()
+      document.addEventListener('keydown', this.keyDown)
+      this.isCompleted = false
+      this.accuracy = 100
+      this.currentTime = 0
+      this.letterPerMinute = 0
+      this.currentLetter = 0
+      this.typingErrors = 0
+      this.isNeedRepeat = !this.isNeedRepeat
+      this.startTimer()
+    },
+    async reloadText () {
+      try {
+        this.fetchedString = (await contentApi.getTextForTest()).data.text
+        await this.repeatTimer()
+      } catch (e) {
+        alert(e)
+      }
+      this.repeatTimer()
+    },
+    isCyrillic (letter) {
+      return /[а-я]/i.test(letter)
     }
   },
   mounted () {
     document.addEventListener('keydown', this.keyDown)
+    this.startTimer()
+  },
+  destroyed () {
+    this.stopTimer()
+    document.removeEventListener('keydown', this.keyDown)
   }
 }
 </script>
 
 <style scoped lang="scss">
+@import "~@/scss/_colors.scss";
+
 .speed-test {
-  height: 100vh;
-}
-
-#type {
-  padding-left: 50px;
-  height: 200px;
-  width: 100%;
-  font-size: 98px;
-  text-align: left;
-}
-
-#type:first-letter {
-  color: darkslategrey;
-}
-
-.handler::first-letter{
-  color: #4f2f2f !important;
+  min-height: 90vh;
+  padding: 5% 25% 0;
 }
 
 #input-card {
-  width: 400px;
-  height: 100px;
-  border: 2px #4f2f2f solid;
+  max-width: 600px;
+  min-width: 200px;
+  height: auto;
+  min-height: 330px;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.dark #input-card {
+  border: 3px $white solid;
+}
+
+.light #input-card {
+  border: 3px $black solid;
 }
 
 .current-letter {
   width: 30px;
-  border-radius: 3px;
+  border-radius: 10px;
+  background-color: $green;
 }
 
-.light .current-letter {
-  background-color: #4d5e57;
-  color: bisque;
+.light .current-letter, .error-letter {
+  color: $white;
 }
 
-.dark .current-letter {
-  background-color: bisque;
-  color: #4d5e57;
+.dark .current-letter, .error-letter {
+  color: $black;
 }
 
 .error-letter {
-  background-color: #4f2f2f;
-  color: bisque;
+  background-color: $red;
   width: 30px;
-  border-radius: 3px;
+  border-radius: 10px;
 }
 
 .passed-letter {
-  color: dimgray;
+  color: $light-blue;
 }
 
 .letter {
   text-align: center;
   font-size: 24px;
   display: inline-block;
+}
+
+.repeat-timer_button {
+  width: 170px;
+}
+
+.light .repeat-timer_button {
+  background-color: $black;
+}
+
+.repeat-text_button {
+  width: 170px;
+  box-sizing: border-box;
+  background-color: transparent;
+}
+
+.dark .repeat-text_button {
+  color: $white;
+  border: 2px $white solid;
+}
+
+.light .repeat-text_button {
+  color: $black;
+  border: 2px $black solid;
 }
 </style>

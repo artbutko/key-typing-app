@@ -4,6 +4,7 @@
         id='change-mode'
         class='change-mode_button'
         :class='mode'
+        onclick='this.blur();'
         @click="$emit('toggle')">
         <font-awesome-icon
           v-show="mode === 'dark'"
@@ -34,7 +35,7 @@ export default {
 @import "~@/scss/colors";
 
 #header {
-  height: 70px;
+  height: 10vh;
 }
 
 .change-mode_button {
