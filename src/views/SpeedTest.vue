@@ -4,7 +4,7 @@
       <b-col
         v-if='!isCompleted'
         id='input-card'
-        :key='isNeedRepeat'
+        :key='isNeedRerender'
         cols='8'
       >
           <p v-for="(item, index) in fetchedString"
@@ -77,7 +77,7 @@ export default {
       fetchedString: '',
       permittedKeys: ['Shift', 'Tab', 'CapsLock', 'Alt', 'Meta', 'Control'],
       currentLetter: 0,
-      isNeedRepeat: false,
+      isNeedRerender: false,
       isCompleted: false,
       typingErrors: 0,
       accuracy: 100,
@@ -89,14 +89,20 @@ export default {
     try {
       this.fetchedString = (await contentApi.getTextForTest()).data.text
     } catch (e) {
-      alert(e)
+      this.makeToast(
+        'danger',
+        'Ошибка загрузки строки',
+        'Попробуйте перезагрузить страницу или обратиться к администратору ресурса')
     }
   },
   methods: {
     keyDown (event) {
       if (this.isCyrillic(event.key)) {
         this.stopTimer()
-        alert('Смените раскладку')
+        this.makeToast(
+          'danger',
+          'Ошибка раскладки',
+          'Для продолжения смените раскладку клавиатуры!')
         this.startTimer()
       } else if (event.key === this.fetchedString[this.currentLetter]) {
         let passedElement = document.getElementById(`letter-${this.currentLetter}`)
@@ -148,7 +154,7 @@ export default {
       this.letterPerMinute = 0
       this.currentLetter = 0
       this.typingErrors = 0
-      this.isNeedRepeat = !this.isNeedRepeat
+      this.isNeedRerender = !this.isNeedRerender
       this.startTimer()
     },
     async reloadText () {
@@ -156,12 +162,23 @@ export default {
         this.fetchedString = (await contentApi.getTextForTest()).data.text
         await this.repeatTimer()
       } catch (e) {
-        alert(e)
+        this.makeToast(
+          'danger',
+          'Ошибка перезагрузки строки',
+          'Попробуйте перезагрузить страницу или обратиться к администратору ресурса')
       }
       this.repeatTimer()
     },
     isCyrillic (letter) {
       return /[а-я]/i.test(letter)
+    },
+    makeToast (variant = null, title, message) {
+      this.$bvToast.toast(message, {
+        toaster: 'b-toaster-top-left',
+        title: title,
+        variant: variant,
+        solid: true
+      })
     }
   },
   mounted () {
@@ -169,8 +186,8 @@ export default {
     this.startTimer()
   },
   destroyed () {
-    this.stopTimer()
     document.removeEventListener('keydown', this.keyDown)
+    this.stopTimer()
   }
 }
 </script>
@@ -193,31 +210,42 @@ export default {
   margin-bottom: 15px;
 }
 
-.dark #input-card {
-  border: 3px $white solid;
+.dark {
+  #input-card {
+    border: 3px $white solid;
+  }
+  .current-letter, .error-letter {
+    color: $black;
+  }
+  .repeat-text_button {
+    color: $white;
+    border: 2px $white solid;
+  }
 }
 
-.light #input-card {
-  border: 3px $black solid;
+.light {
+  #input-card {
+    border: 3px $black solid;
+  }
+  .current-letter, .error-letter {
+    color: $white;
+  }
+  .repeat-timer_button {
+    background-color: $black;
+  }
+  .repeat-text_button {
+    color: $black;
+    border: 2px $black solid;
+  }
 }
 
 .current-letter {
-  width: 30px;
   border-radius: 10px;
   background-color: $green;
 }
 
-.light .current-letter, .error-letter {
-  color: $white;
-}
-
-.dark .current-letter, .error-letter {
-  color: $black;
-}
-
 .error-letter {
   background-color: $red;
-  width: 30px;
   border-radius: 10px;
 }
 
@@ -235,23 +263,9 @@ export default {
   width: 170px;
 }
 
-.light .repeat-timer_button {
-  background-color: $black;
-}
-
 .repeat-text_button {
   width: 170px;
   box-sizing: border-box;
   background-color: transparent;
-}
-
-.dark .repeat-text_button {
-  color: $white;
-  border: 2px $white solid;
-}
-
-.light .repeat-text_button {
-  color: $black;
-  border: 2px $black solid;
 }
 </style>

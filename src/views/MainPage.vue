@@ -2,7 +2,7 @@
   <div class="home">
     <router-link class='center' to='/speed-test'>
       <button class='button-start'>
-        Начать тестирование
+        Начать печатать
       </button>
     </router-link>
   </div>
@@ -31,7 +31,6 @@ export default {
   position: absolute;
   top: 40%;
   left: 50%;
-  -ms-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
 }
 </style>
