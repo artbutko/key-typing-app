@@ -9,11 +9,13 @@
           v-show="mode === 'dark'"
           :icon="['fas', 'moon']"
           size='2x'
+          class='dark-icon'
         />
         <font-awesome-icon
           v-show="mode === 'light'"
           :icon="['fas', 'sun']"
           size='2x'
+          class='light-icon'
         />
       </button>
       <b-tooltip target="change-mode">Поменять оформление</b-tooltip>
@@ -29,6 +31,8 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import "~@/scss/colors";
+
 #header {
   height: 70px;
 }
@@ -40,13 +44,14 @@ export default {
   outline: none;
   align-items: center;
   float: right;
+  background-color: transparent;
 }
 
-.dark {
-  color: bisque;
+.dark-icon {
+  color: $white;
 }
 
-.light {
-  color: darkslategrey;
+.light-icon {
+  color: $black;
 }
 </style>

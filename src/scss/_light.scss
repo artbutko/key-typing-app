@@ -1,0 +1,14 @@
+@import "colors";
+
+.light {
+  transition: 0.2s;
+  background-color: $white;
+  color: $dark-blue;
+  button {
+    outline: none;
+    border-radius: 10px;
+    background-color: $dark-blue;
+    border: none;
+    color: $white;
+  }
+}

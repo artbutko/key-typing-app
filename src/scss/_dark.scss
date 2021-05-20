@@ -1,0 +1,14 @@
+@import "colors";
+
+.dark {
+  transition: 0.2s;
+  background-color: $black;
+  color: $white;
+  button {
+    outline: none;
+    border-radius: 10px;
+    background-color: $white;
+    border: none;
+    color: $black;
+  }
+}

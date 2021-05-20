@@ -24,43 +24,14 @@ export default {
 </script>
 
 <style lang="scss">
+@import './scss/app.scss';
 * {
   margin: 0;
-  font-family: 'Roboto', sans-serif;
+  font-family: Avenir, Helvetica, Arial, sans-serif;
 }
 
 .app {
   min-height: 100vh;
   width: 100vh;
-}
-
-.light {
-  background-color: #EFEEEE;
-  color: darkslategrey;
-  transition: 0.2s;
-  button {
-    border-radius: 5px;
-    outline: none;
-  }
-  .button-outline {
-    border: 2px darkslategrey solid;
-    color: darkslategrey;
-    background-color: transparent;
-  }
-}
-
-.dark {
-  background-color: dimgray;
-  color: bisque;
-  transition: 0.2s;
-  button {
-    border-radius: 5px;
-    outline: none;
-  }
-  .button-outline {
-    border: 2px bisque solid;
-    color: bisque;
-    background-color: transparent;
-  }
 }
 </style>

@@ -3,7 +3,7 @@
     <div id='input-card'>
       <p v-for="(item, index) in fetchedArrayString"
             :key="index"
-            :class="[index === 0 ? 'current' : '']"
+            :class="[index === 0 ? 'current-letter' : '']"
             :id='`letter-${index}`'
             :style='listItemStyle(item)'
             class='letter'
@@ -13,7 +13,7 @@
     </div>
     <SpeedOfTyping
       v-if='isNotCompleted'
-      :symbols="countOfLettersTyped"
+      :symbols="currentLetter"
       :is-string-typed="isStringTyped"
       @open-results-modal='openResultsModal'
     />
@@ -37,46 +37,39 @@ export default {
   },
   data () {
     return {
-      fetchedArrayString: [
-        'Q', 'W', 'E', 'R', 'T', 'Y', ',', 'q', 'w', 'e', 'r',
-        't', 'y', ' ', 'T', 'Y', 'W', 'E', 'R', 'T', 'Y', 'W',
-        'E', 'R', 'T', 'Y', 'W', 'E', 'R', 'T', 'Y'
-      ],
-      providedKeys: ['Shift', 'Tab', 'CapsLock', 'Alt', 'Meta'],
+      fetchedArrayString: 'Мама мыла раму',
+      permittedKeys: ['Shift', 'Tab', 'CapsLock', 'Alt', 'Meta'],
       currentLetter: 0,
       isNotCompleted: true,
-      countOfLettersTyped: 0,
       isStringTyped: false,
       typingErrors: 0
     }
   },
   methods: {
-    removeStyleClass (elementId, tokens) {
-      document
-        .getElementById(elementId)
-        .classList
-        .remove(tokens)
-    },
-    addStyleClass (elementId, tokens) {
-      document
-        .getElementById(elementId)
-        .classList
-        .add(tokens)
-    },
     keyDown (event) {
       if (event.key === this.fetchedArrayString[this.currentLetter]) {
-        this.removeStyleClass(`letter-${this.currentLetter}`, 'current')
-        this.removeStyleClass(`letter-${this.currentLetter}`, 'current-error')
-        this.addStyleClass(`letter-${this.currentLetter}`, 'past')
+        let passedElement = document.getElementById(`letter-${this.currentLetter}`)
+        passedElement.classList.remove('current-letter', 'error-letter')
+        passedElement.classList.add('passed-letter')
+
         this.currentLetter += 1
-        if (this.currentLetter + 1 === this.fetchedArrayString.length) {
+
+        if (this.currentLetter === this.fetchedArrayString.length) {
           this.isStringTyped = true
-        } else {
-          this.countOfLettersTyped++
+          document.removeEventListener('keydown', this.keyDown)
         }
-        this.addStyleClass(`letter-${this.currentLetter}`, 'current')
-      } else if (!this.providedKeys.find((key) => key === event.key)) {
-        this.addStyleClass(`letter-${this.currentLetter}`, 'current-error')
+
+        let currentElement = document.getElementById(`letter-${this.currentLetter}`)
+        if (currentElement) {
+          currentElement.classList.add('current-letter')
+        }
+      } else if (!this.permittedKeys.find((key) => key === event.key)) {
+        let currentErrorElement = document.getElementById(`letter-${this.currentLetter}`)
+        currentErrorElement.classList.add('error-letter')
+        currentErrorElement.innerText = event.key
+        setTimeout(() => {
+          currentErrorElement.innerText = this.fetchedArrayString[this.currentLetter]
+        }, 100)
         this.typingErrors++
       }
     },
@@ -85,8 +78,7 @@ export default {
       this.$bvModal.show('results-modal')
     },
     listItemStyle (i) {
-      if (i === ' ') return 'white-space: pre'
-      return ''
+      return i === ' ' ? 'white-space: pre' : ''
     }
   },
   mounted () {
@@ -122,21 +114,29 @@ export default {
   border: 2px #4f2f2f solid;
 }
 
-.current {
-  background-color: #4d5e57;
-  color: bisque;
+.current-letter {
   width: 30px;
   border-radius: 3px;
 }
 
-.current-error {
+.light .current-letter {
+  background-color: #4d5e57;
+  color: bisque;
+}
+
+.dark .current-letter {
+  background-color: bisque;
+  color: #4d5e57;
+}
+
+.error-letter {
   background-color: #4f2f2f;
   color: bisque;
   width: 30px;
   border-radius: 3px;
 }
 
-.past {
+.passed-letter {
   color: dimgray;
 }
 

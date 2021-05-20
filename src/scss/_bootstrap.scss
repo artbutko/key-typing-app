@@ -1,0 +1,10 @@
+@import "colors";
+
+$primary: $light-blue;
+$secondary: $yellow;
+$success: $green;
+$info: $light-blue;
+$danger: $red;
+
+@import "bootstrap/scss/bootstrap";
+@import "bootstrap-vue/src/index.scss";

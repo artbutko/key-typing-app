@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <router-link class='center' to='/speed-test'>
-      <button class='button-outline button-start px-3'>
+      <button class='button-start'>
         Начать тестирование
       </button>
     </router-link>
@@ -23,6 +23,7 @@ export default {
 .button-start {
   font-size: 36px;
   height: auto;
+  padding: 0 15px 0 15px;
 }
 
 .center {
