@@ -9,12 +9,11 @@
       >
           <p v-for="(item, index) in fetchedString"
              :key="index"
-             :class="[index === 0 ? 'current-letter' : '']"
+             :class="{ 'current-letter': index === 0 }"
              :id='`letter-${index}`'
-             :style='listItemStyle(item)'
              class='letter'
           >
-            {{item}}
+            {{ getLetter(item)}}
           </p>
       </b-col>
       <b-col>
@@ -75,10 +74,13 @@ export default {
   data () {
     return {
       fetchedString: '',
-      permittedKeys: ['Shift', 'Tab', 'CapsLock', 'Alt', 'Meta', 'Control'],
+      permittedKeys: [
+        'Shift', 'Tab', 'CapsLock', 'Alt', 'Meta', 'Control', 'Enter', 'Backspace'
+      ],
       currentLetter: 0,
       isNeedRerender: false,
       isCompleted: false,
+      isOnceError: false,
       typingErrors: 0,
       accuracy: 100,
       currentTime: 0,
@@ -98,18 +100,17 @@ export default {
   methods: {
     keyDown (event) {
       if (this.isCyrillic(event.key)) {
-        this.stopTimer()
         this.makeToast(
           'danger',
           'Ошибка раскладки',
-          'Для продолжения смените раскладку клавиатуры!')
-        this.startTimer()
+          'Неверная раскладка клавиатуры')
       } else if (event.key === this.fetchedString[this.currentLetter]) {
         let passedElement = document.getElementById(`letter-${this.currentLetter}`)
         passedElement.classList.remove('current-letter', 'error-letter')
         passedElement.classList.add('passed-letter')
 
         this.currentLetter += 1
+        this.isOnceError = false
 
         if (this.currentLetter === this.fetchedString.length) {
           document.removeEventListener('keydown', this.keyDown)
@@ -126,15 +127,16 @@ export default {
         currentErrorElement.classList.add('error-letter')
         currentErrorElement.innerText = event.key
         setTimeout(() => {
-          currentErrorElement.innerText = this.fetchedString[this.currentLetter]
+          currentErrorElement.innerText = this.getLetter(
+            this.fetchedString[this.currentLetter])
         }, 100)
-        this.typingErrors++
+        if (!this.isOnceError) {
+          this.typingErrors++
+          this.isOnceError = true
+        }
         this.accuracy = ((1 - (this.typingErrors / this.fetchedString.length)) * 100)
           .toFixed(2)
       }
-    },
-    listItemStyle (i) {
-      return i === ' ' ? 'white-space: pre' : ''
     },
     startTimer () {
       this.timer = setInterval(() => {
@@ -154,6 +156,7 @@ export default {
       this.letterPerMinute = 0
       this.currentLetter = 0
       this.typingErrors = 0
+      this.isOnceError = false
       this.isNeedRerender = !this.isNeedRerender
       this.startTimer()
     },
@@ -179,6 +182,9 @@ export default {
         variant: variant,
         solid: true
       })
+    },
+    getLetter (letter) {
+      return letter === ' ' ? '\xa0' : letter
     }
   },
   mounted () {
