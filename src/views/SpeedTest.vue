@@ -4,7 +4,7 @@
       <b-col
         v-if='!isCompleted'
         id='input-card'
-        :key='isNeedRerender'
+        :key='isRerender'
         cols='8'
       >
           <p v-for="(item, index) in fetchedString"
@@ -78,7 +78,7 @@ export default {
         'Shift', 'Tab', 'CapsLock', 'Alt', 'Meta', 'Control', 'Enter', 'Backspace'
       ],
       currentLetter: 0,
-      isNeedRerender: false,
+      isRerender: false,
       isCompleted: false,
       isOnceError: false,
       typingErrors: 0,
@@ -157,7 +157,7 @@ export default {
       this.currentLetter = 0
       this.typingErrors = 0
       this.isOnceError = false
-      this.isNeedRerender = !this.isNeedRerender
+      this.isRerender = !this.isRerender
       this.startTimer()
     },
     async reloadText () {
