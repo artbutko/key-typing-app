@@ -1,29 +1,47 @@
-# key-typing-app
+# Тренажер слепой печати
+## Описание
+Тренажер был выполнен с использованием следующих технологий:
+* VueJS
+* Bootstrap
 
-## Project setup
+## Демонстрация
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/Aj32DHhz2-0/0.jpg)](http://www.youtube.com/watch?v=Aj32DHhz2-0 "Video Title")
+
+## Требования
+#### Обязательные
+- [x] получение текста через публичные API (http://numbersapi.com/)
+- [x] отображение набираемого текста в реальном времени; 
+- [x] демонстрация скорости печати; 
+- [x] реакция на ввод неверных символов; 
+- [x] подсчет точности вводимой информации.
+
+#### Рекомендованные
+- [x] React / VueJS;
+- [ ] Redux/MobX/Vuex;
+- [x] bootstrap для верстки;
+
+## Установка
+#### Установка и загрузка зависимостей
 ```
 yarn install
 ```
 
-### Compiles and hot-reloads for development
+#### Компиляция и запуск для разработки
 ```
 yarn serve
 ```
 
-### Compiles and minifies for production
+#### Компиляция и минимизация для релиза
 ```
 yarn build
 ```
 
-### Run your unit tests
+#### Запуск unit-тестов
 ```
 yarn test:unit
 ```
 
-### Lints and fixes files
+#### Запуск линтера
 ```
 yarn lint
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
